@@ -40,6 +40,7 @@ def letterngrams(text, num=1, charset='alpha'):
     # Third we collect the n-grams
     ngramsdict = {}
     idx = 0
+    tot = 0
     for i in range(1, len(text)-num):
         if charset == 'alpha':
             if text[idx + i:idx + i + num].isalpha():
@@ -54,6 +55,10 @@ def letterngrams(text, num=1, charset='alpha'):
             ngram = text[idx + i:idx + i + num]
         if ngram in ngramsdict:
             ngramsdict[ngram] += 1
+            tot += 1
         else:
             ngramsdict[ngram] = 1
+            tot += 1
+    for key in ngramsdict.keys():
+        ngramsdict[key] = ngramsdict[key] / tot
     return ngramsdict

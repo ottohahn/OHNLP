@@ -3,36 +3,13 @@
 """
 A language detector using cosine distance and n-grams
 TO DO
-- [ ] Calcular la frecuencia de cada ngrama en letterngram
-- [ ] Contar solo las letras o poner una opcion en letterngram para contar solo
-      letras
+- [X] Calculate frequencies for each ngram
+- [X] Have options for letters, numbers, a mixture or both
 """
 import math
-import string
 import pickle
 import OHNLP.letterngram.letterngram as lng
 
-
-def bigram_freq(textinp):
-    """
-    Function to calculate the letter bigram frequency distribution of a
-    string using the letterngram function
-    """
-    bigrams = {}
-    tot = 0.0
-    # Iterate over text and ignore punctuation, and numbers
-    textinp = textinp.replace('\n', ' ')
-    for i in range(0, len(textinp)-1):
-        if (((textinp[i].isalpha()) and  (textinp[i] not in string.punctuation))
-                and ((textinp[i+1].isalpha()) and  (textinp[i+1] not in string.punctuation))):
-            if textinp[i:i+2].lower() in bigrams:
-                bigrams[textinp[i:i+2].lower()] += 1.
-            else:
-                bigrams[textinp[i:i+2].lower()] = 1.
-            tot += 1.0
-    for key in bigrams:
-        bigrams[key] = bigrams[key] / tot
-    return bigrams
 
 def cosine_distance(vec1, vec2):
     """
@@ -66,7 +43,6 @@ def create_lang_model(corpus, modelname):
     """
     Auxiliary function to create a language model from a group of files
     and store it in the languages dictionary, then pickle everything
-    
     """
     # Corpus is a list of filenames that we have to open
     master = ""
@@ -74,7 +50,7 @@ def create_lang_model(corpus, modelname):
         fileinp = open(doc, 'r')
         raw_text = fileinp.read()
         master += raw_text  # here we have a huge string
-    model = bigram_freq(master)
+    model = lng.letterngrams(master, num=2, charset='alpha')
     # Open the modelname file
     fileout = open(modelname, 'w')
     for key in model:
@@ -97,7 +73,7 @@ def language_detection(sample):
     # Here we are going to read the models
     lang_dict = readmodels('models.pkl')
     # Here we begin the actual language detection
-    sample_freq = lng.letterngrams(sample, num=2) # Change this to letterngrams
+    sample_freq = lng.letterngrams(sample, num=2, charset='alpha') # Change this to letterngrams
     mindist = 0.5
     lang = 'UNK'
     for key in lang_dict:
