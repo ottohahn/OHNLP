@@ -41,18 +41,22 @@ def letterngrams(text, num=1, charset='alpha'):
     ngramsdict = {}
     idx = 0
     tot = 0
-    for i in range(1, len(text)-num):
+    for i in range(1, len(text) - num):
+        ngram = None
+        chunk = text[idx + i:idx + i + num]
         if charset == 'alpha':
-            if text[idx + i:idx + i + num].isalpha():
-                ngram = text[idx + i:idx + i + num]
+            if chunk.isalpha():
+                ngram = chunk
         elif charset == 'alphanum':
-            if text[idx + i:idx + i + num].isalnum():
-                ngram = text[idx + i:idx + i + num]
+            if chunk.isalnum():
+                ngram = chunk
         elif charset == 'num':
-            if text[idx + i:idx + i + num].isdigit():
-                ngram = text[idx + i:idx + i + num]
+            if chunk.isdigit():
+                ngram = chunk
         elif charset == 'all':
-            ngram = text[idx + i:idx + i + num]
+            ngram = chunk
+        if ngram is None:
+            continue
         if ngram in ngramsdict:
             ngramsdict[ngram] += 1
             tot += 1
