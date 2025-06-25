@@ -7,62 +7,39 @@ INPUT: TEXT, A STRING; N INTEGER
 OUTPUT: NGRAMS: A DICTIONARY WITH THE NGRAMS AS KEYS AND THE FREQUENCY AS VALUE
 """
 
-def letterngrams(text, num=1, charset='alpha'):
+from collections import Counter
+
+
+def letterngrams(text, num=1, charset="alpha"):
+    """Return normalized letter ``num``-gram frequencies for ``text``.
+
+    ``charset`` determines which n-grams are counted:
+    ``"alpha"`` only alphabetic, ``"alphanum"`` alphanumeric, ``"num"`` digits
+    only and ``"all"`` accepts every character.
     """
-    A letter frequency counter for strings of text.
-    the default is unigrams
-    for n-grams we will use the following convention
-    e.g. ablation, n = 3
-    @@a
-    @ab
-    abl
-    bla
-    lat
-    ati
-    tio
-    ion
-    on@
-    n@@
-    the letter in question is always the last of the tuple
-    for the character set it can be alpha, alphanum or all.
-    """
-    # First we replace newlines and tabs with space
-    text = text.replace('\n', ' ')
-    text = text.replace('\t', ' ')
-    #Second we prepend and append n-1  @ signs
-    simb = '@'
-    finstr = ''
-    for i in range(0, num):
-        finstr += simb
-    text = finstr.join(text.split())
-    text = finstr + text
-    text = text + finstr
-    # Third we collect the n-grams
-    ngramsdict = {}
-    idx = 0
-    tot = 0
-    for i in range(1, len(text) - num):
-        ngram = None
-        chunk = text[idx + i:idx + i + num]
-        if charset == 'alpha':
-            if chunk.isalpha():
-                ngram = chunk
-        elif charset == 'alphanum':
-            if chunk.isalnum():
-                ngram = chunk
-        elif charset == 'num':
-            if chunk.isdigit():
-                ngram = chunk
-        elif charset == 'all':
-            ngram = chunk
-        if ngram is None:
+
+    # Normalize whitespace once
+    text = text.replace("\n", " ").replace("\t", " ")
+
+    # Pad words with ``@`` symbols and join them using the same padding.  This
+    # mirrors the behaviour of the original implementation but avoids repeated
+    # string concatenations inside the loop.
+    pad = "@" * num
+    text = pad + pad.join(text.split()) + pad
+
+    ngrams = []
+    for i in range(len(text) - num + 1):
+        chunk = text[i:i + num]
+
+        if charset == "alpha" and not chunk.isalpha():
             continue
-        if ngram in ngramsdict:
-            ngramsdict[ngram] += 1
-            tot += 1
-        else:
-            ngramsdict[ngram] = 1
-            tot += 1
-    for key in ngramsdict.keys():
-        ngramsdict[key] = ngramsdict[key] / tot
-    return ngramsdict
+        if charset == "alphanum" and not chunk.isalnum():
+            continue
+        if charset == "num" and not chunk.isdigit():
+            continue
+
+        ngrams.append(chunk)
+
+    total = len(ngrams)
+    freq = Counter(ngrams)
+    return {k: v / total for k, v in freq.items()}
